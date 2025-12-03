@@ -1,0 +1,11 @@
+streamlit
+langchain
+selenium
+PyPDF2
+python-docx
+bcrypt
+pymongo
+python-dotenv
+pandas
+requests
+beautifulsoup4
