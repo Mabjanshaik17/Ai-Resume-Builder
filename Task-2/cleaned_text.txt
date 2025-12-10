@@ -1,0 +1,42 @@
+MAHABOOBJAN SHAIK
+Python Developer
+Email: shaikmabjan17@gmail.com
+Phone: +91 63021784217
+Location: Anantapur, Andhra Pradesh
+
+TECHNICAL SKILLS
+- Core Python
+- HTML
+- CSS
+- Basic Programming Concepts
+
+ACADEMIC QUALIFICATIONS
+- B.Tech (ece), 2022–2026
+  Golden Valley Integrated Campus
+- Intermediate (MPC), 2019–2021
+  Sri Pratibha Junior College – 92%
+- SSC, 2018–2019
+  Sri Pragna Vidyalayam – 93%
+
+PROJECTS
+1. IoT Based Smart Parking System
+   - Developed using IoT sensors
+   - Improves parking efficiency
+   - Tools: Sensors, Arduino IDE
+
+2. Smart Door Lock System
+   - IoT-based home security system
+   - Tools: Arduino IDE
+
+3. AI Resume Builder
+   - Built using Python and Streamlit
+   - Automates resume extraction and summarization
+
+INTERNSHIP
+LearnSquare Technologies (Python Developer Intern)
+June 2023 – July 2023
+
+PERSONAL DETAILS
+- Date of Birth: 13-04-2003
+- Languages Known: Telugu, Hindi, English
+- Address: Yemmiganur, AP
