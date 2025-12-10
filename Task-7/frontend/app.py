@@ -1,84 +1,66 @@
 import streamlit as st
 import requests
+import re
 import sys
 import os
-
-import pandas as pd
 from utils import save_history, load_history, search_history
+
+# Resolve path to Task-4 backend folder
+current_dir = os.path.dirname(os.path.abspath(__file__))
+backend_path = os.path.abspath(os.path.join(current_dir, "../../Task-4/backend"))
+
+# Add backend path to Python import search path
+if backend_path not in sys.path:
+    sys.path.append(backend_path)
+
+from auth import register_user, login_user
+from main import parse_basic_info, extract_text_from_pdf
+
+
+# =========================================
+# 🔹 CONFIGURATION & INITIALIZATION
+# =========================================
+st.set_page_config(page_title="AI Resume Manager", layout="wide")
 
 BACKEND_URL = "http://localhost:8000/upload_resume"
 
-st.set_page_config(page_title="AI Resume Manager", layout="wide")
+if "resume_records" not in st.session_state:
+    st.session_state.resume_records = []
 
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+
+# =========================================
+# 🔹 APP TITLE
+# =========================================
 st.title("AI-Powered Resume Manager")
 
+# Sidebar Navigation Menu
 menu = st.sidebar.radio(
     "Select Page",
     ["Registration", "Login", "Upload Resume", "Dashboard"]
 )
 
-# ---------------------------
-# PAGE 1 — Upload Resume
-# ---------------------------
-if menu == "Upload Resume":
-
-    st.header("Upload a Resume for Parsing")
-
-    uploaded = st.file_uploader("Choose a PDF or DOCX file", type=["pdf", "docx"])
-
-    if uploaded:
-
-        # Send to backend
-        with st.spinner("Processing your resume..."):
-            files = {"file": uploaded}
-            response = requests.post(BACKEND_URL, files=files)
-
-        if response.status_code == 200:
-            data = response.json()
-
-            parsed = data["parsed_info"]
-            extracted = data["extracted_text"]
-
-            # Display results
-            st.success("Resume Updated Successfully!")
-
-
-        else:
-            st.error("Error parsing file. Check backend.")
-
-# ---------------------------
-# PAGE 2 — Resume History
-# ---------------------------
-# ---------------------------
-# PAGE — Registration
-# ---------------------------
-elif menu == "Registration":
-
-    import re
-    import sys
-    import os
-
-    # Backend path setup
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    backend_path = os.path.join(current_dir, "..", "..", "Task-4", "backend")
-    backend_path = os.path.abspath(backend_path)
-
-    if backend_path not in sys.path:
-        sys.path.append(backend_path)
-
-    from auth import register_user
+# =========================================
+# 🔹 REGISTRATION PAGE
+# =========================================
+if menu == "Registration":
 
     st.header("Create New Account")
 
-    # Validation functions
+
     def valid_name(name):
         return bool(re.match(r"^[A-Za-z ]+$", name))
+
 
     def valid_email(email):
         return bool(re.match(r"^[\w\.-]+@[\w\.-]+\.\w+$", email))
 
+
     def valid_password(password):
         return len(password) >= 6
+
 
     with st.form("register_form"):
         full_name = st.text_input("Full Name")
@@ -89,127 +71,148 @@ elif menu == "Registration":
         submitted = st.form_submit_button("Register")
 
         if submitted:
-
-            # Validations
             if not full_name or not email or not password or not confirm_password:
                 st.error("All fields are required.")
-
             elif not valid_name(full_name):
                 st.error("Name must contain alphabets only.")
-
             elif not valid_email(email):
                 st.error("Invalid email address.")
-
             elif not valid_password(password):
                 st.error("Password must be at least 6 characters.")
-
             elif password != confirm_password:
                 st.error("Passwords do not match.")
-
             else:
                 success, message = register_user(full_name, email, password)
-
                 if success:
                     st.success(message)
                 else:
                     st.error(message)
 
-
-
-# ---------------------------
-# PAGE — Login
-# ---------------------------
+# =========================================
+# 🔹 LOGIN PAGE
+# =========================================
 elif menu == "Login":
-
-    import sys
-    import os
-
-    # Add backend path
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    backend_path = os.path.abspath(os.path.join(current_dir, "../../Task-4/backend"))
-    if backend_path not in sys.path:
-        sys.path.append(backend_path)
-
-    from auth import login_user
 
     st.header("User Login")
 
     with st.form("login_form"):
         email = st.text_input("Email")
         password = st.text_input("Password", type="password")
-
         submitted = st.form_submit_button("Login")
 
         if submitted:
-
             if not email or not password:
                 st.error("Please fill all fields.")
-
             else:
                 success, message = login_user(email, password)
-
                 if success:
+                    st.session_state.logged_in = True
+                    st.session_state.user_email = email
                     st.success(message)
-                    st.session_state["logged_in"] = True
-                    st.session_state["user_email"] = email
                 else:
                     st.error(message)
 
-import streamlit as st
-import sys
-import os
+# =========================================
+# 🔹 UPLOAD RESUME PAGE
+# =========================================
+elif menu == "Upload Resume":
+    # Initialize storage
+    if "resume_records" not in st.session_state:
+        st.session_state.resume_records = []
 
-# -----------------------------------
-# Import backend modules
-# -----------------------------------
-current_dir = os.path.dirname(os.path.abspath(__file__))
-backend_path = os.path.abspath(os.path.join(current_dir, "../../Task-6/backend"))
-sys.path.append(backend_path)
+    st.header("Upload a Resume for Parsing")
 
-from parse_utils import parse_basic_info
+    uploaded = st.file_uploader("Choose PDF or DOCX", type=["pdf", "docx"])
+
+    if uploaded:
+
+        with st.spinner("Processing your resume..."):
+            files = {"file": uploaded}
+            response = requests.post(BACKEND_URL, files=files)
+
+        if response.status_code == 200:
+            data = response.json()
+            parsed = data.get("parsed_info", {})
+            extracted = data.get("extracted_text", "")
+
+            # Save parsed data to session storage
+            st.session_state.resume_records.append({
+                "filename": uploaded.name,
+                "parsed": parsed,
+                "extracted": extracted
+            })
+
+            st.success("Resume Parsed Successfully!")
+
+            emails = parsed.get("emails", [])
+
+            st.markdown("##### 📧 Email Addresses")
+
+            if emails:
+                for email in emails:
+                    st.write(f"- {email}")
+            else:
+                st.write("No email found")
+
+            st.write("##### 📞 Phone Numbers")
+            phones = parsed.get("phones", [])
+
+            if phones:
+                for phone in phones:
+                    st.write(f"- {phone}")
+            else:
+                st.write("No phone number found")
+
+            st.info(f"📌 Total resumes stored locally: {len(st.session_state.resume_records)}")
+
+        else:
+            st.error("Error parsing file. Check backend.")
+
+# =========================================
+# 🔹 DASHBOARD PAGE
+# =========================================
+elif menu == "Dashboard":
 
 
 
-# -----------------------------------
-# DASHBOARD FUNCTION
-# -----------------------------------
-def dashboard():
-    st.title("User Dashboard")
+    if not st.session_state.logged_in:
+        st.warning("⚠ Please login to access dashboard.")
+        st.stop()
 
-    # Check login session
-    if "user_email" not in st.session_state:
-        st.error("You are not logged in! Please login first.")
-        return
+    email = st.session_state.user_email
+    user = parse_basic_info(email)
+    st.subheader("Parsed Resume Data")
+    if st.session_state.resume_records:
+        for rec in st.session_state.resume_records:
+            st.write(f"**📄 File: {rec['filename']}**")
+            parsed = rec["parsed"]
 
-    email = st.session_state["user_email"]
-    user = get_user_details(email)
+            st.write(f"**👤 Name:** {parsed.get('name', 'Not found')}")
 
-    st.subheader(f"Welcome, {user.get('name', 'User')} 👋")
-    st.write(f"**Email:** {email}")
+            st.write("**📧 Email(s):**")
+            emails = parsed.get("emails", [])
+            if emails:
+                for email in emails:
+                    st.write(f"- {email}")
+            else:
+                st.write("No email found")
 
-    st.markdown("---")
-    st.header("Upload and Parse Resume")
+            st.write("**📞 Phone Number(s):**")
+            phones = parsed.get("phones", [])
+            if phones:
+                for phone in phones:
+                    st.write(f"- {phone}")
+            else:
+                st.write("No phone number found")
 
-    uploaded_file = st.file_uploader("Select your Resume (PDF / DOCX)", type=["pdf", "docx"])
-
-    if uploaded_file:
-        # Temporary save
-        temp_path = "temp_resume"
-
-        with open(temp_path, "wb") as f:
-            f.write(uploaded_file.read())
-
-        st.success("Uploading successful! Parsing your resume...")
-
-        # Parse using backend
-        parsed_output = parse_basic_info(text=uploaded_file.read())
-
-        # Show parsed text
-        st.subheader("📄 Parsed Resume Text")
-        st.text_area("Extracted Text", parsed_output, height=350)
-
-        # Save to session
-        st.session_state["parsed_resume"] = parsed_output
-
-        # Remove temporary file
-        os.remove(temp_path)
+            st.write("**💼 Skills:**")
+            skills = parsed.get("skills", [])
+            if skills:
+                for skill in skills:
+                    st.write(f"- {skill}")
+            else:
+                st.write("No skills found")
+            with st.expander("View Extracted Text"):
+                st.write(rec["extracted"])
+    else:
+        st.info("No stored resume data yet.")
