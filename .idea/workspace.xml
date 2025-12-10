@@ -4,15 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="13b56cbb-f293-46fa-96e5-1dadb558f682" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/Ai-Resume-Builder.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Task-3/pages/dashboard.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Task-4/backend/main.py" afterDir="false" />
-    </list>
+    <list default="true" id="13b56cbb-f293-46fa-96e5-1dadb558f682" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -96,7 +88,7 @@
       <workItem from="1765120883382" duration="821000" />
       <workItem from="1765208264243" duration="3723000" />
       <workItem from="1765299196469" duration="8151000" />
-      <workItem from="1765340411413" duration="704000" />
+      <workItem from="1765340411413" duration="1304000" />
     </task>
     <servers />
   </component>
